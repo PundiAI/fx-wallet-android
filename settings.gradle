@@ -1,0 +1,2 @@
+include ':libs_blockchain'
+rootProject.name='f-x-wallet-android'
