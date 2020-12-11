@@ -17,3 +17,15 @@ Android Device Requirements
 - targetSdkVersion 29
 - internet connection
 - camera for QR code scanning
+
+
+Maintainers
+---
+
+[@FunctionX](https://github.com/FunctionX)。
+
+
+License
+---
+
+[MIT](LICENSE) © FunctionX
