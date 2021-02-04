@@ -27,8 +27,8 @@ import java.util.Map;
 /**
  * @ClassName: FunctionxNodeConfig
  * @Description:
- * @Author: yangtao
- * @CreateDate: 2020/11/25 6:13 PM
+ * @Author: joker
+ * @CreateDate: 2020/11/25 6:13
  */
 public class FunctionxNodeConfig {
 
@@ -59,10 +59,8 @@ public class FunctionxNodeConfig {
                 for (LocalCoinModel localCoinModel : coinModelList) {
                     final ArrayList<NodeModel> entryValue = entry.getValue();
                     for (NodeModel nodeModel : entryValue) {
-                        //链一样
                         if (entry.getKey().equals(Coin.getCoinForCoinType(localCoinModel.getCoinType()).getName().toLowerCase())) {
                             ServiceChainType chainType = ServiceChainType.getChainType(localCoinModel.getChainType());
-                            //对比环境
                             if (chainType.getChainType()==(getNodeChainType(coin))) {
                                 List<LocalCoinModel> localCoinModelList = nodeModel.getLocalCoinModelList();
                                 if (localCoinModelList == null) {
@@ -112,7 +110,6 @@ public class FunctionxNodeConfig {
     }
 
     public List<LocalCoinModel> getCoinResources() {
-        //获取币种列表
         String token = ServiceFactory.getInstance().getCoinResourcesConfigure().getCoinResources();
         if (TextUtils.isEmpty(token)) {
             token = SystemUtils.getAssetsString("token/coin.json", mContext);
@@ -176,6 +173,4 @@ public class FunctionxNodeConfig {
     }
 
     public static final String KEY_CHAIN_SELECT = "coin_chain_select";
-    public static final String KEY_COIN_RESOURCES = "coin_resources_v1";
-    public static final String KEY_COIN = "key_data";
 }
