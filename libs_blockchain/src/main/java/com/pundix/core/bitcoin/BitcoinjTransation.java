@@ -34,14 +34,12 @@ import java.util.List;
 
 import retrofit2.Response;
 
-
 /**
  * @ClassName: BitcoinRpcService
  * @Author: Joker
  * @CreateDate: 2019-11-06 16:24
  */
 public class BitcoinjTransation implements ITransation {
-    private final String TAG = "BitcoinjTransation";
     private NetworkParameters networkParameters = MainNetParams.get();
     private long feeRate = 20;
 
