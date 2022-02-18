@@ -7,11 +7,9 @@ import android.util.Log;
 import com.binance.dex.api.client.domain.jsonrpc.ABCIQueryResult;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.pundix.core.FunctionxNodeConfig;
-import com.pundix.core.bitcoin.model.Gas;
 import com.pundix.core.factory.ITransation;
 import com.pundix.core.factory.TransationData;
 import com.pundix.core.factory.TransationResult;
-import com.pundix.core.model.NodeModel;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.Coin;

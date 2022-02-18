@@ -5,8 +5,8 @@ import android.text.TextUtils;
 import com.pundix.core.factory.TransationData;
 
 /**
- * Description：
- * @author joker
+ * Description：EthereumTransationData
+ * @author Carl
  * @date 2020/5/25
  */
 public class EthereumTransationData extends TransationData {

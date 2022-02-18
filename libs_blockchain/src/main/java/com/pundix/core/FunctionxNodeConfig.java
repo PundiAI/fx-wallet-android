@@ -2,18 +2,18 @@ package com.pundix.core;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.google.gson.reflect.TypeToken;
-import com.pundix.common.autoservice.ServiceFactory;
+
 import com.pundix.common.utils.ContextUtil;
 import com.pundix.common.utils.GsonUtils;
 import com.pundix.common.utils.PreferencesUtil;
 import com.pundix.common.utils.SystemUtils;
 import com.pundix.core.coin.Coin;
 import com.pundix.core.coin.ServiceChainType;
-import com.pundix.core.model.LocalCoinModel;
-import com.pundix.core.model.NodeModel;
+
+import com.pundix.core.ethereum.model.NodeModel;
+
 
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * @ClassName: FunctionxNodeConfig
  * @Description:
- * @Author: joker
+ * @Author: Carl
  * @CreateDate: 2020/11/25 6:13
  */
 public class FunctionxNodeConfig {
@@ -50,80 +50,25 @@ public class FunctionxNodeConfig {
         mContext = ContextUtil.getContext();
         if (nodeInfoMap == null) {
             String nodeList = SystemUtils.getAssetsString("node/nodeConfig.json", mContext);
-            nodeInfoMap = GsonUtils.fromJson(nodeList, new TypeToken<Map<String, List<NodeModel>>>() {
-            }.getType());
-            final List<LocalCoinModel> coinModelList = getAllCoinModel();
-
-            for (Map.Entry<String, ArrayList<NodeModel>> entry : nodeInfoMap.entrySet()) {
-                final Coin coin = Coin.getCoin(entry.getKey());
-                for (LocalCoinModel localCoinModel : coinModelList) {
-                    final ArrayList<NodeModel> entryValue = entry.getValue();
-                    for (NodeModel nodeModel : entryValue) {
-                        if (entry.getKey().equals(Coin.getCoinForCoinType(localCoinModel.getCoinType()).getName().toLowerCase())) {
-                            ServiceChainType chainType = ServiceChainType.getChainType(localCoinModel.getChainType());
-                            if (chainType.getChainType()==(getNodeChainType(coin))) {
-                                List<LocalCoinModel> localCoinModelList = nodeModel.getLocalCoinModelList();
-                                if (localCoinModelList == null) {
-                                    localCoinModelList = new ArrayList<>();
-                                    nodeModel.setLocalCoinModelList(localCoinModelList);
-                                }
-                                localCoinModelList.add(localCoinModel);
-                                nodeModel.setLocalCoinModelList(localCoinModelList);
-                            }
-                        }
-                    }
-
-                }
+            nodeInfoMap = GsonUtils.fromJson(nodeList, new TypeToken<Map<String, List<NodeModel>>>() {}.getType());
+            for (Coin coin:Coin.values()){
+                getNodeChainType(coin);
             }
         }
     }
 
     public NetworkParameters getNetworkParameters() {
-
-        if (getNodeChainType(Coin.BITCOIN)== ServiceChainType.BITCOIN_MAINNET.getChainType()) {
+        if (getNodeChainType(Coin.BITCOIN) == ServiceChainType.BITCOIN_MAINNET.getChainType()) {
             return MainNetParams.get();
         }
         return TestNet3Params.get();
     }
 
 
-    public List<LocalCoinModel> getAllCoinModel() {
-        List<LocalCoinModel> coinModelList = getCoinResources();
-        List<LocalCoinModel> removeModel = new ArrayList<>();
-        for (LocalCoinModel coinModel : coinModelList) {
-            if (coinModel.getStatus() == 2) {
-                removeModel.add(coinModel);
-            }
-        }
-        for (LocalCoinModel coinModel : removeModel) {
-            coinModelList.remove(coinModel);
-        }
-
-        List<LocalCoinModel> newData = new ArrayList<>();
-        for (LocalCoinModel localCoinModel : coinModelList) {
-            Coin coin = Coin.getCoinForCoinType(localCoinModel.getCoinType());
-            if (localCoinModel.getChainType()==(getNodeChainType(coin))) {
-                newData.add(localCoinModel);
-            }
-        }
-        return newData;
-    }
-
-    public List<LocalCoinModel> getCoinResources() {
-        String token = ServiceFactory.getInstance().getCoinResourcesConfigure().getCoinResources();
-        if (TextUtils.isEmpty(token)) {
-            token = SystemUtils.getAssetsString("token/coin.json", mContext);
-        }
-        List<LocalCoinModel> data = GsonUtils.fromJson(token, new TypeToken<List<LocalCoinModel>>() {
-        }.getType());
-
-        return data;
-    }
-
 
     public NodeModel getNodeConfig(Coin coin) {
         NodeModel nodeModel = null;
-        final ArrayList<NodeModel> nodeModels = nodeInfoMap.get(coin.getId());
+        ArrayList<NodeModel> nodeModels = nodeInfoMap.get(coin.getId());
         for (NodeModel nodeModel1 : nodeModels) {
             final int nodeChainType = getNodeChainType(coin);
             ServiceChainType chainType = ServiceChainType.getChainType(nodeChainType);
@@ -135,41 +80,47 @@ public class FunctionxNodeConfig {
         return nodeModel;
     }
 
-    private boolean isMain() {
-        if ((BuildConfig.BUILD_TYPE.contains("uat") || BuildConfig.BUILD_TYPE.contains("release"))) {
+
+
+    public boolean isEthereumMain() {
+        if (getNodeChainType(Coin.ETHEREUM) == ServiceChainType.ETHEREUM_MAINNET.getChainType()) {
             return true;
         }
         return false;
     }
 
-    public boolean isEthereumMain() {
-        if (getNodeChainType(Coin.ETHEREUM)== ServiceChainType.ETHEREUM_MAINNET.getChainType()) {
-            return true;
-        }
-        return false;
+    public Map<String, Integer> getDefuletNodeMap() {
+        Map<String, Integer> chainMap = new HashMap<>();
+        chainMap.put(Coin.BITCOIN.getId(), ServiceChainType.BITCOIN_MAINNET.getChainType());
+        chainMap.put(Coin.ETHEREUM.getId(), ServiceChainType.ETHEREUM_MAINNET.getChainType());
+        chainMap.put(Coin.BINANCE.getId(), ServiceChainType.BINANCE_BEP_TESTNET.getChainType());
+        chainMap.put(Coin.FX_COIN.getId(), ServiceChainType.FXCORE_MAINNET.getChainType());
+        chainMap.put(Coin.BINANCE_BSC.getId(), ServiceChainType.BINANCE_BSC_TESTNET.getChainType());
+        chainMap.put(Coin.FX_PAYMENT.getId(), ServiceChainType.FX_PAYMENT_TESTNET.getChainType());
+        return chainMap;
     }
 
     public int getNodeChainType(Coin coin) {
         String chain = PreferencesUtil.getStringData(mContext, KEY_CHAIN_SELECT);
         Map<String, Integer> chainMap = new HashMap<>();
         if (TextUtils.isEmpty(chain)) {
-            if (isMain()) {
-                chainMap.put("bitcoin", ServiceChainType.BITCOIN_TESTNET3.getChainType());
-                chainMap.put("ethereum", ServiceChainType.ETHEREUM_KOVAN.getChainType());
-                chainMap.put("binance", ServiceChainType.BINANCE_TESTNET.getChainType());
-                chainMap.put("hub", ServiceChainType.FXCLOUD_TESTNET.getChainType());
-            } else {
-                chainMap.put("bitcoin", ServiceChainType.BITCOIN_TESTNET3.getChainType());
-                chainMap.put("ethereum", ServiceChainType.ETHEREUM_KOVAN.getChainType());
-                chainMap.put("binance", ServiceChainType.BINANCE_TESTNET.getChainType());
-                chainMap.put("hub", ServiceChainType.FXCLOUD_TESTNET.getChainType());
-            }
+            chainMap = getDefuletNodeMap();
             PreferencesUtil.saveStringData(mContext, KEY_CHAIN_SELECT, GsonUtils.toJson(chainMap));
         } else {
-            chainMap = GsonUtils.fromJson(chain, new TypeToken<Map<String, Integer>>() {
-            }.getType());
+            chainMap = GsonUtils.fromJson(chain, new TypeToken<Map<String, Integer>>() {}.getType());
         }
-        return chainMap.get(coin.getId());
+        if(chainMap.size() != Coin.values().length){
+            for (Coin coin1:Coin.values()){
+                final Integer integer = chainMap.get(coin1.getId());
+                if(integer == null){
+                    final Integer integer1 = getDefuletNodeMap().get(coin1.getId());
+                    chainMap.put(coin1.getId(), integer1);
+                }
+            }
+            PreferencesUtil.saveStringData(mContext, KEY_CHAIN_SELECT, GsonUtils.toJson(chainMap));
+        }
+
+        return  chainMap.get(coin.getId());
     }
 
     public static final String KEY_CHAIN_SELECT = "coin_chain_select";

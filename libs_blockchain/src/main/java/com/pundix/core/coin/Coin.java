@@ -1,20 +1,35 @@
 package com.pundix.core.coin;
 
 
+import com.pundix.common.constants.BitcoinUtil;
 import com.pundix.core.FunctionxNodeConfig;
+import com.pundix.core.R;
 
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Bech32;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
 import org.web3j.utils.Numeric;
+
 import java.io.Serializable;
 
 import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
 
+/**
+ * @ClassName: Coin
+ * @Description:
+ * @Author: Carl
+ * @CreateDate: 2021/5/27 2:16 PM
+ */
 public enum Coin implements Serializable {
-    ETHEREUM("ethereum", "", "Ethereum", "ETH", 18, 60, "file:///android_asset/dapp/coin_2.png", "Ethereum", 0xff004167),
-    FX_COIN("hub", "fx", "FXCORE", "FXC", 18, 118, "file:///android_asset/coins/coin_1.png", "Function X", 0xff0552DC),
-    BITCOIN("bitcoin", "", "Bitcoin", "BTC", 8, 0, "file:///android_asset/coins/coin_7.png", "Bitcoin", 0xffDDA800),
-    BINANCE("binance", "", "Binance", "BNB", 8, 714, "file:///android_asset/coins/coin_5.png", "Binance", 0xff333333);
+    ETHEREUM("ethereum", "", "Ethereum", "ETH", 18, 60, "Ethereum", R.drawable.icon_chain_ethereum_512,R.drawable.icon_chain_black_ethereum_32,R.drawable.home_ethereum_chain_w, 0xff004167),
+    BINANCE_SMART_CHAIN("bsc", "", "BinanceSmartChain", "BNB", 18, 60, "BSC", R.drawable.icon_chain_bsc_512,R.drawable.icon_chain_black_bsc_32,R.drawable.home_bsc_chain_w, 0xff333333),
+    FX_COIN("fxcore", "fx", "FX", "FX", 18, 118, "f(x)Core", R.drawable.icon_chain_fxcore_512,R.drawable.icon_chain_black_funcitonx_32,R.drawable.home_fx_chain_w ,0xff0552DC),
+    FX_PUNDIX("pundix", "px", "PUNDIX", "PUNDIX", 18, 118, "Pundi X Chain", R.drawable.icon_chain_fxcore_512,R.drawable.icon_chain_black_pundix_32,R.drawable.home_pundix_chain_w, 0xff0552DC),
+    FX_DEX("fxdex", "dex", "Variable", "FX", 18, 118, "Variable", R.drawable.icon_chain_variable_32,R.drawable.icon_chain_black_variable, R.drawable.home_variablefff,0xff0552DC),
+    BITCOIN("bitcoin", "", "Bitcoin", "BTC", 8, 0, "Bitcoin", R.drawable.icon_chain_bitcoin_512,R.drawable.icon_chain_black_btc_32, R.drawable.home_btc_chain_w,0xffDDA800),
+    POLYGON("polygon", "", "Polygon", "MATIC", 18, 60, "Polygon", R.drawable.icon_chain_polygon_512,R.drawable.icon_chain_black_polygon_32, R.drawable.home_polygon_chain_w,0xff333333),
+    TRON("tron", "", "Tron", "TRX", 6, 195, "Tron", R.drawable.icon_chain_tron_512,R.drawable.icon_chain_black_tron_32, R.drawable.home_tron_chain_w,0xff333333);
 
     String id;
     String hrp;
@@ -55,14 +70,6 @@ public enum Coin implements Serializable {
         return FX_COIN;
     }
 
-    public static Coin getCoinForCoinType(int coinType) {
-        for (Coin coin : Coin.values()) {
-            if (coinType == coin.getCoinType()) {
-                return coin;
-            }
-        }
-        return FX_COIN;
-    }
 
     public String getDescribe() {
         return describe;
@@ -101,15 +108,27 @@ public enum Coin implements Serializable {
     }
 
     public String getNodeDerivationPath(int index) {
+
         return String.format("44H/%sH/1H/0/%s", coinType, index);
+
     }
 
     public String getDerivationPath() {
-        return "44H/" + coinType + "H/0H/0/%s";
+        if (this == BITCOIN) {
+             return BitcoinUtil.getLocalBitcoinDerivatinPath();
+        } else {
+            return "44H/" + coinType + "H/0H/0/%s";
+        }
+
     }
 
     public String getDerivationPath(int index) {
-        return String.format("44H/%sH/0H/0/%s", coinType, index);
+        if (this == BITCOIN) {
+            return BitcoinUtil.getLocalBitcoinDerivatinPath(index);
+        } else {
+            return String.format("44H/%sH/0H/0/%s", coinType, index);
+        }
+
     }
 
 
@@ -117,36 +136,71 @@ public enum Coin implements Serializable {
         return FunctionxNodeConfig.getInstance().getNodeConfig(this).getUrl();
     }
 
+
     public static boolean isValidAddress(Coin coin, String input) {
         switch (coin) {
             case ETHEREUM:
+            case BINANCE_BSC:
                 return isValidEthAddress(input);
             case BITCOIN:
                 return isValidBtcAddress(input);
-            case FX_COIN:
-            default:
+            case FX_COIN: {
                 try {
                     final Bech32.Bech32Data decode = Bech32.decode(input);
                     final String hrp = decode.hrp;
-                    return true;
+                    if (hrp.equals("fx")) {
+                        return true;
+                    }
                 } catch (Exception e) {
-                    return false;
-                }
 
+                }
+                return false;
+            }
+            case FX_PAYMENT: {
+                try {
+                    final Bech32.Bech32Data decode = Bech32.decode(input);
+                    final String hrp = decode.hrp;
+                    if (hrp.equals("pay")) {
+                        return true;
+                    }
+                } catch (Exception e) {
+
+                }
+                return false;
+            }
+
+            case BINANCE: {
+                try {
+                    final Bech32.Bech32Data decode = Bech32.decode(input);
+                    final String hrp = decode.hrp;
+                    if (hrp.equals("bnb") || hrp.equals("tbnb")) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                }
+                return false;
+            }
+            default:
+                return false;
         }
     }
 
     private static boolean isValidBtcAddress(String input) {
+        Address address = null;
         try {
-            Address address = Address.fromString(FunctionxNodeConfig.getInstance().getNetworkParameters(), input);
-            if (address != null) {
-                return true;
-            } else {
-                return false;
-            }
+            address = Address.fromString(MainNetParams.get(), input);
         } catch (Exception e) {
-            return false;
+            e.printStackTrace();
         }
+        try {
+            address = Address.fromString(TestNet3Params.get(), input);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (address != null) {
+            return true;
+        }
+        return false;
     }
 
     public static boolean isValidEthAddress(String input) {
@@ -160,6 +214,5 @@ public enum Coin implements Serializable {
 
         return cleanInput.length() == ADDRESS_LENGTH_IN_HEX;
     }
-
 
 }

@@ -3,11 +3,12 @@ package com.pundix.core.bitcoin.model;
 /**
  * @ClassName: BitcoinResultModel
  * @Description:
- * @Author: Joker
+ * @Author: YT
  * @CreateDate: 2020/6/16 11:30 AM
  */
 public class BitcoinResultModel {
     private BitcoinTx tx;
+    private String error;
 
     public BitcoinTx getTx() {
         return tx;
@@ -28,5 +29,13 @@ public class BitcoinResultModel {
 
         private String hash;
 
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 }

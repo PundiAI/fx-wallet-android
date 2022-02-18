@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @ClassName: BitcoinAccountModel
  * @Description:
- * @Author: Joker
+ * @Author: YT
  * @CreateDate: 2020/6/15 2:14 PM
  */
 public class BitcoinAccountModel {

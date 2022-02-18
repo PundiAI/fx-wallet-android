@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.binance.dex.api.client.domain.jsonrpc.ABCIQueryResult;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.pundix.core.bitcoin.model.Gas;
 import com.pundix.core.factory.ITransation;
 import com.pundix.core.factory.TransationData;
 import com.pundix.core.factory.TransationResult;
@@ -19,11 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NoneTransation implements ITransation {
-    private static final String TAG = "EthereumTransation";
-    private NoneTransationData noneTransationData;
 
-    public NoneTransation() {
-    }
+    private NoneTransationData noneTransationData;
 
     @Override
     public TransationResult sendTransation(TransationData transationData) throws Exception {
@@ -116,6 +112,11 @@ public class NoneTransation implements ITransation {
         return gas;
     }
 
+    @Override
+    public Object getTxs(Object data) {
+        return null;
+    }
+
 
     private Client buildClient(NoneTransationData noneTransationData) {
         RpcOptions rpcOptionsSms = RpcOptions.builder()
@@ -153,7 +154,6 @@ public class NoneTransation implements ITransation {
             byte[] raw = AminoEncoding.aminoDecode(Base64.decode(resultRpcResp.getResult().getResponse().getValue(), Base64.DEFAULT), true, false);
             Base.ResponseCheckTx responseCheckTx = Base.ResponseCheckTx.parseFrom(raw);
             long gasUsed = responseCheckTx.getGasUsed() + 35000;
-            Log.e("TAG", "getOtherEstimateGas: " + gasUsed);
             return String.valueOf(gasUsed);
         }
         throw new RuntimeException("ethEstimateGas error");

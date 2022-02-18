@@ -2,6 +2,10 @@ package com.pundix.core.bitcoin;
 
 import com.pundix.core.factory.TransationData;
 
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
+
 public class BitcoinTransationData extends TransationData {
 
     private static final long serialVersionUID = 1906792461389715166L;
@@ -10,6 +14,22 @@ public class BitcoinTransationData extends TransationData {
     private String privateKey;
     private String amount;
     private String fee;
+    private boolean isMain;
+
+    public NetworkParameters getNetworkParameters() {
+        if(isMain){
+            return MainNetParams.get();
+        }
+        return TestNet3Params.get();
+    }
+
+    public boolean isMain() {
+        return isMain;
+    }
+
+    public void setMain(boolean main) {
+        isMain = main;
+    }
 
     public String getFromAddress() {
         return fromAddress;

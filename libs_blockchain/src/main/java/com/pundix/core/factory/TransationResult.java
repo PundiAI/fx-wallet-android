@@ -3,16 +3,34 @@ package com.pundix.core.factory;
 import java.io.Serializable;
 
 /**
- * Description：
+ * Description：TransationResult
  *
- * @author Joker
+ * @author Carl
  * @date 2020/5/25
  */
 public class TransationResult implements Serializable {
     private static final long serialVersionUID = -468388638631166335L;
     private Integer code;
     private String hash;
+    private String fxHash;
+    private String ethHash;
     private String msg;
+
+    public String getFxHash() {
+        return fxHash;
+    }
+
+    public void setFxHash(String fxHash) {
+        this.fxHash = fxHash;
+    }
+
+    public String getEthHash() {
+        return ethHash;
+    }
+
+    public void setEthHash(String ethHash) {
+        this.ethHash = ethHash;
+    }
 
     public String getHash() {
         return hash;
